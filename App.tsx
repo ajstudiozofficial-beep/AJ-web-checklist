@@ -79,6 +79,7 @@ const generateInitialData = () => {
 export default function App() {
   const [currentView, setCurrentView] = useState<string>('home');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   // App State for Photos
@@ -128,6 +129,7 @@ export default function App() {
     // Simple slugify for footer links: "Blog Post" -> "blog-post"
     const slug = view.toLowerCase().replace(/\s+/g, '-');
     setCurrentView(slug);
+    setIsMobileMenuOpen(false); // Close mobile menu on navigation
   };
 
   const toHumanReadable = (slug: string) => {
@@ -223,11 +225,49 @@ export default function App() {
           </button>
           
           {/* Mobile Menu Trigger */}
-          <button className="md:hidden p-2 hover:bg-gray-200/50 dark:hover:bg-dark-hover rounded-full transition-colors">
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 hover:bg-gray-200/50 dark:hover:bg-dark-hover rounded-full transition-colors"
+          >
             <Menu className="w-6 h-6 stroke-1 text-gray-900 dark:text-white" />
           </button>
         </div>
       </header>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="md:hidden fixed inset-0 bg-black/50 z-40"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Menu Panel */}
+          <div className="md:hidden fixed top-20 left-0 right-0 bg-white dark:bg-dark-card z-50 border-b border-gray-200 dark:border-dark-border shadow-lg">
+            <nav className="flex flex-col p-4">
+              {NAV_LINKS.map(link => (
+                <button
+                  key={link.id}
+                  onClick={() => {
+                    if (link.id === 'home') handleNavigate('home');
+                    else if (link.id === 'browse') handleNavigate('browse');
+                    else if (link.id === 'photos') handleNavigate('photos');
+                    else handleNavigate('browse');
+                  }}
+                  className={`text-left py-3 px-4 rounded-lg text-[15px] font-medium transition-colors ${
+                    isLinkActive(link.id)
+                      ? 'bg-gray-100 dark:bg-dark-hover text-gray-900 dark:text-white' 
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-hover/50'
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </>
+      )}
 
       {/* Main View Router */}
       <main className="transition-opacity duration-300">
